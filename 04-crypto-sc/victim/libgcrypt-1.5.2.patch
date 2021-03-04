@@ -97,7 +97,7 @@ index 689a3db..72b9872 100644
  # random.c uses fork() thus a test for W32 does not make any sense.
 diff --git a/04-crypto-sc/victim/libgcrypt-1.5.2/tests/ringbus-victim.c b/04-crypto-sc/victim/libgcrypt-1.5.2/tests/ringbus-victim.c
 new file mode 100644
-index 0000000..33caae9
+index 0000000..b74d795
 --- /dev/null
 +++ b/04-crypto-sc/victim/libgcrypt-1.5.2/tests/ringbus-victim.c
 @@ -0,0 +1,268 @@
@@ -234,7 +234,7 @@ index 0000000..33caae9
 +  // From here we basically provide an on-demand decryption service
 +  // to the monitor by repeating the gcry_pk_decrypt operation
 +
-+  pin_cpu(2);
++  pin_cpu(5);   // 5 for the full flush; 6 for the L1/L2 only
 +
 +  volatile struct sharestruct *mysharestruct = get_sharestruct();
 +  mysharestruct->iteration_of_interest_running = 0;

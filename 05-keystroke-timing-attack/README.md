@@ -28,7 +28,7 @@ Then, to reproduce the results of the paper, follow the steps below.
 In the SSH setting this means opening two separate, independent SSH sessions. 
 In the local setting, this means opening one first session that is on the local tty (for the victim) and one second session that is either on another local tty or on an SSH session (for the attacker). Note that the input goes on the local tty.
 3. Run the victim on the victim shell with `./bin/victim`.
-4. Run the attacker on the other shell with `sudo ./bin/monitor 1 0`.
+4. Run the attacker on the other shell with `sudo ./bin/monitor 3 2`.
 As soon as the attacker starts, type some characters on the victim shell, such as `password1230` (the `0` will terminate the string).
 Once you see `# DONE, storing data` appear on the attacker side, it indicates the attacker has stopped. 
 All keystrokes should be finished before that point (be quick!).

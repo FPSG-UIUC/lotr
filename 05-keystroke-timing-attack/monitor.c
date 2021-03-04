@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 	}
 
 	// For this experiment we can use a fixed cache set
-	int set_ID = 5;
+	int set_ID = 4;
 
 	// Prepare data output file
 	FILE *output_data;

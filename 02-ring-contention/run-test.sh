@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
 
-RECEIVER_CORE=2
-RECEIVER_SLICE=1
+RECEIVER_CORE=3
+RECEIVER_SLICE=0
 
 echo "> receiver $RECEIVER_CORE $RECEIVER_SLICE"
 
-for SENDER_CORE in 3; do
-# for SENDER_CORE in {0..3}; do
+for SENDER_CORE in 0; do
+# for SENDER_CORE in 5; do
+# for SENDER_CORE in {0..7}; do
 
 	if [[ "$SENDER_CORE" == "$RECEIVER_CORE" ]]; then
 		continue
 	fi
 
-	# for SENDER_SLICE in {0..3}; do
-	for SENDER_SLICE in 0 1 2 3; do
+	# for SENDER_SLICE in {0..7}; do
+	for SENDER_SLICE in 1 2 5; do
+	# for SENDER_SLICE in 7; do
 
 		echo ""
 		echo "sender $SENDER_CORE $SENDER_SLICE"

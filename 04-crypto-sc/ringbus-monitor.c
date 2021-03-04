@@ -53,8 +53,8 @@ int main(int argc, char **argv)
 	// Parse cleansing mechanism
 	int cleansing_mechanism;
 	sscanf(argv[5], "%d", &cleansing_mechanism);
-	if (cleansing_mechanism != 1) {
-		printf("Wrong cleansing_mechanism! cleansing_mechanism should be 1!\n");
+	if (cleansing_mechanism != 1 && cleansing_mechanism != 2) {
+		printf("Wrong cleansing_mechanism! cleansing_mechanism should be 1 or 2!\n");
 		exit(1);
 	}
 

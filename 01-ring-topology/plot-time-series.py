@@ -5,8 +5,8 @@ import os
 import numpy as np
 
 
-num_cores = 4
-num_slices = 4
+num_cores = 8
+num_slices = 8
 
 
 def moving_average(x, N):

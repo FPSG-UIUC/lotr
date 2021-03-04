@@ -331,10 +331,10 @@ if __name__ == '__main__':
     # Set configuration
     monitor_path = './bin/ringbus-monitor'
 
-    monitor_coreno = 1
-    monitor_sliceno = 0
+    monitor_coreno = 2      # 2 is best for the full cache flush; 5 for the L1/L2 flush only
+    monitor_sliceno = 1     # 1 is best for the full cache flush; 4 for the L1/L2 flush only
 
-    cleansing_mechanism = 1      # 1 for clflush the address space (only one tested on skylake)
+    cleansing_mechanism = 1      # 1 for clflush the address space; 2 for L1 and L2 flushing
 
     eddsa_path = './victim/libgcrypt-1.6.3/tests/ringbus-victim'            # EdDSA
     rsa_path = './victim/libgcrypt-1.5.2/tests/ringbus-victim'            # RSA

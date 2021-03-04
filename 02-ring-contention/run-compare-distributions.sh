@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-RECEIVER_CORE=2
-RECEIVER_SLICE=1
-SENDER_CORE=1
-SENDER_SLICE=0
+RECEIVER_CORE=3
+RECEIVER_SLICE=2
+SENDER_CORE=4
+SENDER_SLICE=1
 
 # Remove data from previous runs
 sudo rm -rf out/*.out

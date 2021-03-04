@@ -25,7 +25,7 @@ Then, to reproduce the results of the paper, you can run the following two comma
 
 - `./run-all-covert.sh`: this script runs the covert channel test of the paper, with the sender transmitting alternating bits to the receiver.
 It outputs a plot with a sample of the trace collected by the receiver.
-The default interval used is 4000 cycles, but you can use a different interval by passing it as an argument to the script.
+The default interval used is 3000 cycles, but you can use a different interval by passing it as an argument to the script.
 - `./run-all-capacity.sh`: this script runs the covert channel test with different interval values.
 It outputs the covert channel capacity plot of the paper.
 

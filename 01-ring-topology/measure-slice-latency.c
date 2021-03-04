@@ -153,16 +153,18 @@ int main(int argc, char **argv)
 		// This trick ensures that the timed loads below don't hit in the L1 or L2.
 		// We are performing loads that conflict with the ones below in L1 and L2.
 		//
-		// The list traversal algorithm is the skylake one from:
+		// We chose the eviction set traversal algorithm that worked best for our CPU,
+		// and you can find it and other ones here:
 		//     https://github.com/cgvwzq/evsets/blob/master/cache.c
 		current = eviction_set;
-		while (current && current->next && current->next->next) {
+		// while (current && current->next && current->next->next) {
+		while (current && current->next) {
 			maccess(current->address);
 			maccess(current->next->address);
-			maccess(current->next->next->address);
+			// maccess(current->next->next->address);
 			maccess(current->address);
 			maccess(current->next->address);
-			maccess(current->next->next->address);
+			// maccess(current->next->next->address);
 			current = current->next;
 		}
 

@@ -113,13 +113,14 @@ void check_attack_iteration(uint8_t *attacking) {
 			for (int k = 0; k < L2_CACHE_SETS; k++) {
 				for (int ii = 0; ii < 2; ii++) {
 					current = eviction_sets[k];
-					while (current && current->next && current->next->next) {
+					while (current && current->next) {
+					// while (current && current->next && current->next->next) {
 						maccess(current->address);
 						maccess(current->next->address);
-						maccess(current->next->next->address);
+						// maccess(current->next->next->address);
 						maccess(current->address);
 						maccess(current->next->address);
-						maccess(current->next->next->address);
+						// maccess(current->next->next->address);
 						current = current->next;
 					}
 				}

@@ -10,7 +10,7 @@ If you cannot find a branch for your CPU, extra work may be needed to port the c
 
 ## Tested Setup
 
-The code of this branch was tested on a **bare-metal** machine with an Intel **i7-6700K CPU**, running **Ubuntu Server 16.04 LTS**.
+The code of this branch was tested on a **bare-metal** machine with an Intel **i7-9700 CPU**, running **Ubuntu Server 16.04 LTS**.
 We do not guarantee that it works in virtualized environments, on other CPUs, or with other OSs.
 
 ## Materials

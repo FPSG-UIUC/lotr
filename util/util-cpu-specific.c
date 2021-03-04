@@ -13,11 +13,13 @@
 
 const unsigned long long MSR_UNC_PERF_GLOBAL_CTRL = 0xe01;
 
-const unsigned long long *MSR_UNC_CBO_PERFEVTSEL0 = (unsigned long long[]){0x700, 0x710, 0x720, 0x730};
+const unsigned long long *MSR_UNC_CBO_PERFEVTSEL0 = (unsigned long long[]){0x700, 0x710, 0x720, 0x730,
+																		   0x740, 0x750, 0x760, 0xf70};
 
 const unsigned long long SELECT_EVENT_CORE = 0x408f34;
 
-const unsigned long long *MSR_UNC_CBO_PERFCTR0 = (unsigned long long[]){0x706, 0x716, 0x726, 0x736};
+const unsigned long long *MSR_UNC_CBO_PERFCTR0 = (unsigned long long[]){0x706, 0x716, 0x726, 0x736,
+																		0x746, 0x756, 0x766, 0xf76};
 
 const unsigned long long ENABLE_CTRS = 0x20000000;
 
@@ -285,7 +287,7 @@ uint64_t get_cache_slice_index(void *va)
 	// uint64_t slice_id = find_CBO();
 
 	uint64_t pa = get_physical_address(va);
-	uint64_t slice_id = skylake_i7_6700_cache_slice_alg(pa);
+	uint64_t slice_id = coffee_lake_i7_9700_cache_slice_alg(pa);
 
 	// // Code to verify that our slice mapping function works as expected
 	// check_reversed_function_correct(slice_id, va);

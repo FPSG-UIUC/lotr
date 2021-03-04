@@ -75,6 +75,14 @@ This is done to prepare the plots in paper, visualize the difference between bit
 If you want, however, you can change the victim's cryptographic key and the loop iterations that the monitor targets (see also the orchestrator).
 Also, if you need to see the ground truth for any other configuration you may choose to monitor, you can uncomment the respective lines in `lotr.c` (look for the `FIXME` comments).
 
+If you want, you can also change the cache cleansing mechanism that is used upon the simulated context switch at the beginning of a victim's attacked iteration.
+To to so, you have to change two things:
+
+1. Change the `tests/ringbus-victim.c` files of the victims so that they pin the victim (function call `pin_cpu`) to the right CPU (for L1 and L2 flushing the best combination is different than for the full flushing).
+2. Recompile the victims.
+3. Change the `orchestrator.py` so that they use the flushing mechanism that you want (variable `cleansing_mechanism`) and the `monitor_coreno` and `monitor_sliceno` that works best for it (see the paper for the ones we used for different flushing mechanisms).
+4. Repeat the experiments above.
+
 ## Output
 
 You can find the output of the experiment in the file `plot/plot-side-channel.pdf`.

@@ -60,7 +60,7 @@ def parse_runs(directory='out'):
     print("[+] Preparing plots zoomed-in around keystroke events")
     delta = 6200		# FIXME: change to see more/less zoomed-in plots
     low_thres = 120		# FIXME: change to other ranges if needed
-    high_thres = 180	# FIXME: change to other ranges if needed
+    high_thres = 250	# FIXME: change to other ranges if needed
 
     # Print how the trace looks like around keystrokes
     for index, keystroke in enumerate(all_keystrokes):
@@ -142,7 +142,7 @@ def parse_runs(directory='out'):
         plt.legend()
 
         # # Try to detect peaks automatically
-        # peaks = detect_peaks(ma, mph=154.6, mpd=20)
+        # peaks = detect_peaks(ma, mph=168.6, mpd=20)
         # for peak in peaks:
         #    plt.axvline(x=samples_x[peak], color='C2', alpha=.5)
 
@@ -191,7 +191,7 @@ def parse_runs(directory='out'):
     all_samples_x = np.delete(all_samples_x, todelete)
 
     # Compute the moving average of the measurements
-    window = 4000   # 2000    # FIXME: change to smaller value for tty
+    window = 3000  # 1750    # FIXME: change to smaller value for tty
     ma = moving_average(samples, window)
     lower = min(ma)
     upper = max(ma)
@@ -202,7 +202,7 @@ def parse_runs(directory='out'):
     if (False):
 
         # Detect all peaks (not just keystroke ones) so that we can see how the false positives look like too
-        peaks = detect_peaks(ma, mph=154.6, mpd=20)
+        peaks = detect_peaks(ma, mph=166, mpd=20)
         i = 0
         index = 0
         while True:
