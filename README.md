@@ -43,7 +43,7 @@ You can find some code to learn more about this in the `util` subdirectory.
 If you make any use of this code for academic purposes, please cite the paper:
 
 ```tex
-@inproceedings{paccagnella2020lotr,
+@inproceedings{paccagnella2021lotr,
     author = {Riccardo Paccagnella and Licheng Luo and Christopher W. Fletcher},
     title = {Lord of the Ring(s): Side Channel Attacks on the {CPU} On-Chip Ring Interconnect Are Practical},
     booktitle = {Proc.\ of the USENIX Security Symposium (USENIX)},
