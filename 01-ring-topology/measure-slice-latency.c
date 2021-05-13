@@ -1,7 +1,7 @@
 #include "../util/util.h"
 #include <sys/resource.h>
 
-#define BUF_SIZE 400 * 1024UL * 1024 /* Buffer Size -> 400*1MB */
+#define BUF_SIZE 100 * 1024UL * 1024 /* Buffer Size -> 100*1MB */
 
 int main(int argc, char **argv)
 {
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
 	offset = find_next_address_on_slice_and_set(buffer, slice_ID, set_ID);
 
 	// Save this address in the monitoring set
-	append_string_to_linked_list(&monitoring_set, buffer + offset);
+	append_string_to_linked_list(&monitoring_set, (void *)((uint64_t)buffer + offset));
 
 	// Get the L1, L2 and L3 cache set indexes of the monitoring set
 	index3 = get_cache_set_index((uint64_t)monitoring_set->address, 3);
@@ -91,11 +91,11 @@ int main(int argc, char **argv)
 		while (index1 != get_cache_set_index((uint64_t)current->address + offset, 1) ||
 			   index2 != get_cache_set_index((uint64_t)current->address + offset, 2) ||
 			   index3 != get_cache_set_index((uint64_t)current->address + offset, 3) ||
-			   slice_ID != get_cache_slice_index(current->address + offset)) {
+			   slice_ID != get_cache_slice_index((void *)((uint64_t)current->address + offset))) {
 			offset += LLC_INDEX_STRIDE;
 		}
 
-		append_string_to_linked_list(&monitoring_set, current->address + offset);
+		append_string_to_linked_list(&monitoring_set, (void *)((uint64_t)current->address + offset));
 		current = current->next;
 	}
 
@@ -104,12 +104,12 @@ int main(int argc, char **argv)
 	while (index1 != get_cache_set_index((uint64_t)monitoring_set->address + offset, 1) ||
 		   index2 != get_cache_set_index((uint64_t)monitoring_set->address + offset, 2) ||
 		   index3 == get_cache_set_index((uint64_t)monitoring_set->address + offset, 3) ||
-		   slice_ID != get_cache_slice_index(monitoring_set->address + offset)) {
+		   slice_ID != get_cache_slice_index((void *)((uint64_t)monitoring_set->address + offset))) {
 		offset += L2_INDEX_STRIDE;
 	}
 
 	// Save this address in the eviction set
-	append_string_to_linked_list(&eviction_set, monitoring_set->address + offset);
+	append_string_to_linked_list(&eviction_set, (void *)((uint64_t)monitoring_set->address + offset));
 
 	// Find more addresses of the eviction set
 	current = eviction_set;
@@ -118,11 +118,11 @@ int main(int argc, char **argv)
 		while (index1 != get_cache_set_index((uint64_t)current->address + offset, 1) ||
 			   index2 != get_cache_set_index((uint64_t)current->address + offset, 2) ||
 			   index3 == get_cache_set_index((uint64_t)current->address + offset, 3) ||
-			   slice_ID != get_cache_slice_index(current->address + offset)) {
+			   slice_ID != get_cache_slice_index((void *)((uint64_t)current->address + offset))) {
 			offset += L2_INDEX_STRIDE;
 		}
 
-		append_string_to_linked_list(&eviction_set, current->address + offset);
+		append_string_to_linked_list(&eviction_set, (void *)((uint64_t)current->address + offset));
 		current = current->next;
 	}
 

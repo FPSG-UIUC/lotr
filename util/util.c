@@ -130,7 +130,7 @@ uint64_t find_next_address_on_slice_and_set(void *va, uint8_t desired_slice, uin
 	// get addresses on different sets and that might impact the latency regardless
 	// of ring-bus contention.
 	while (get_cache_set_index((uint64_t)va + offset, 3) != desired_set ||
-		   desired_slice != get_cache_slice_index(va + offset)) {
+		   desired_slice != get_cache_slice_index((void *)((uint64_t)va + offset))) {
 		offset += CACHE_BLOCK_SIZE;
 	}
 	return offset;
