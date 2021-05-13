@@ -1,6 +1,6 @@
 #include "../util.h"
 
-#define BUF_SIZE 400 * 1024UL * 1024 /* Buffer Size -> 400*1MB */
+#define BUF_SIZE 100 * 1024UL * 1024 /* Buffer Size -> 100*1MB */
 
 int main(int argc, char **argv)
 {
@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 
 	uint64_t offset = CACHE_BLOCK_SIZE; // skip to the next address with the same LLC cache set index
 	while (1) {
-		get_cache_slice_index(buffer + offset);
+		get_cache_slice_index((void *)((uint64_t)buffer + offset));
 		offset += CACHE_BLOCK_SIZE;
 	}
 

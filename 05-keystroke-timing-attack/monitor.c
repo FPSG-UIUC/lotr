@@ -1,6 +1,6 @@
 #include "../util/util.h"
 
-#define BUF_SIZE 400 * 1024UL * 1024 /* Buffer Size -> 400*1MB */
+#define BUF_SIZE 100 * 1024UL * 1024 /* Buffer Size -> 100*1MB */
 
 #define MAXSAMPLES 50331648
 
@@ -70,7 +70,7 @@ int main(int argc, char **argv)
 	offset = find_next_address_on_slice_and_set(buffer, slice_ID, set_ID);
 
 	// Save this address in the monitoring set
-	monitoring_set = (void **)(buffer + offset);
+	monitoring_set = (void **)((uint64_t) buffer + offset);
 
 	// Get the L1 and L2 cache set indexes of the monitoring set
 	index2 = get_cache_set_index((uint64_t)monitoring_set, 2);
@@ -83,12 +83,12 @@ int main(int argc, char **argv)
 		offset = L2_INDEX_STRIDE; // skip to the next address with the same L2 cache set index
 		while (index1 != get_cache_set_index((uint64_t)current + offset, 1) ||
 			   index2 != get_cache_set_index((uint64_t)current + offset, 2) ||
-			   slice_ID != get_cache_slice_index(current + offset)) {
+			   slice_ID != get_cache_slice_index((void *)((uint64_t)current + offset))) {
 			offset += L2_INDEX_STRIDE;
 		}
 
 		// Set up pointer chasing. The idea is: *addr1 = addr2; *addr2 = addr3; and so on.
-		*current = current + offset;
+		*current = (void **)((uint64_t)current + offset);
 		current = *current;
 	}
 

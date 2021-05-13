@@ -1,7 +1,7 @@
 #include "lotr.h"
 #include "pmparser.h"
 
-#define BUF_SIZE 100 * 1024UL * 1024
+#define BUF_SIZE 100 * 1024UL * 1024 /* Buffer Size -> 100*1MB */
 
 static volatile struct sharestruct *mysharestruct = NULL;
 static struct Node *eviction_sets[L2_CACHE_SETS];
@@ -50,7 +50,7 @@ void prepare_for_attack(uint8_t *attacking) {
 
 			uint32_t set_index = get_cache_set_index((uint64_t)buffer + offset, 2);
 			if (number_of_addresses[set_index] < L2_CACHE_WAYS) {
-				append_string_to_linked_list(&eviction_sets[set_index], buffer + offset);
+				append_string_to_linked_list(&eviction_sets[set_index], (void *)((uint64_t)buffer + offset));
 				number_of_addresses[set_index] += 1;
 				offset += PAGE;
 
