@@ -9,9 +9,9 @@ int main(int argc, char **argv)
 	int i, j;
 
 	// Check arguments
-	if (argc != 6) {
-		fprintf(stderr, "Wrong Input! Enter desired core ID, slice ID, repetitions, iteration of interest, and cleansing mechanism!\n");
-		fprintf(stderr, "Enter: %s <core_ID> <slice_ID> <repetitions> <iteration_of_interest> <cleansing_mechanism>\n", argv[0]);
+	if (argc != 7) {
+		fprintf(stderr, "Wrong Input! Enter desired core ID, slice ID, repetitions, iteration of interest 1, iteration of interest 2, and cleansing mechanism!\n");
+		fprintf(stderr, "Enter: %s <core_ID> <slice_ID> <repetitions> <iteration_of_interest 1>  <iteration_of_interest 2> <cleansing_mechanism>\n", argv[0]);
 		exit(1);
 	}
 
@@ -42,17 +42,25 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	// Parse victim iteration to attack
-	int victim_iteration_no;
-	sscanf(argv[4], "%d", &victim_iteration_no);
-	if (victim_iteration_no <= 0) {
-		printf("Wrong victim_iteration_no! victim_iteration_no should be greater than 0!\n");
+	// Parse first victim iteration to attack
+	int victim_iteration_no_1;
+	sscanf(argv[4], "%d", &victim_iteration_no_1);
+	if (victim_iteration_no_1 <= 0) {
+		printf("Wrong victim_iteration_no! victim_iteration_no_1 should be greater than 0!\n");
+		exit(1);
+	}
+
+	// Parse second victim iteration to attack
+	int victim_iteration_no_2;
+	sscanf(argv[5], "%d", &victim_iteration_no_2);
+	if (victim_iteration_no_2 <= 0) {
+		printf("Wrong victim_iteration_no! victim_iteration_no_2 should be greater than 0!\n");
 		exit(1);
 	}
 
 	// Parse cleansing mechanism
 	int cleansing_mechanism;
-	sscanf(argv[5], "%d", &cleansing_mechanism);
+	sscanf(argv[6], "%d", &cleansing_mechanism);
 	if (cleansing_mechanism != 1 && cleansing_mechanism != 2) {
 		printf("Wrong cleansing_mechanism! cleansing_mechanism should be 1 or 2!\n");
 		exit(1);
@@ -95,7 +103,7 @@ int main(int argc, char **argv)
 	offset = find_next_address_on_slice_and_set(buffer, slice_ID, set_ID);
 
 	// Save this address in the monitoring set
-	monitoring_set = (void **)((uint64_t) buffer + offset);
+	monitoring_set = (void **)((uint64_t)buffer + offset);
 
 	// Get the L1 and L2 cache set indexes of the monitoring set
 	index2 = get_cache_set_index((uint64_t)monitoring_set, 2);
@@ -149,97 +157,109 @@ int main(int argc, char **argv)
 	// Ready to go
 	//////////////////////////////////////////////////////////////////////
 
-	int rept_index;
-	for (rept_index = 0; rept_index < repetitions; rept_index++) {
+	int victim_iteration_no;
+	for (int victim_iteration_index = 1; victim_iteration_index < 3; victim_iteration_index++) {
 
-		// Prepare data output file
-		char output_data_fn[6 + 4 + 9 + 1];
-		sprintf(output_data_fn, "./out/%04d_data.out", rept_index);
-		FILE *output_data;
-		if (!(output_data = fopen(output_data_fn, "w"))) {
-			perror("fopen");
+		if (victim_iteration_index == 1) {
+			victim_iteration_no = victim_iteration_no_1;
+		} else if (victim_iteration_index == 2) {
+			victim_iteration_no = victim_iteration_no_2;
+		} else {
+			fprintf(stderr, "victim_iteration_no was larger than 2. Bad\n");
 			exit(1);
 		}
 
-		// Prepare
-		current = monitoring_set;
-		uint8_t active = 0;
-		uint32_t waiting_for_victim = 0;
+		int rept_index;
+		for (rept_index = 0; rept_index < repetitions; rept_index++) {
 
-		// Double-check that the victim has not started yet
-		if (sharestruct->iteration_of_interest_running) {
-			fprintf(stderr, "victim already started?\n");
-		}
-
-		// Request the victim to sign
-		sharestruct->sign_requested = victim_iteration_no;
-
-		// Start monitoring loop
-		for (i = 0; i < MAXSAMPLES; i++) {
-
-			// Check if the victim's iteration of interest ended
-			if (active) {
-				if (!sharestruct->iteration_of_interest_running) {
-					break;
-				}
+			// Prepare data output file
+			char output_data_fn[64];
+			sprintf(output_data_fn, "./out/%04d_data_%d.out", rept_index, victim_iteration_index);
+			FILE *output_data;
+			if (!(output_data = fopen(output_data_fn, "w"))) {
+				perror("fopen");
+				exit(1);
 			}
 
-			// Check if the victim's iteration of interest started
-			if (!active) {
-				i = 0;
-				if (sharestruct->iteration_of_interest_running) {
-					active = 1;
+			// Prepare
+			uint8_t active = 0;
+			uint32_t waiting_for_victim = 0;
 
-				} else {
-					waiting_for_victim++;
-					if (waiting_for_victim == 1000000) {
-						fprintf(stderr, "Missed run - trying again\n");
-						rept_index--;
+			// Double-check that the victim has not started yet
+			if (sharestruct->iteration_of_interest_running) {
+				fprintf(stderr, "victim already started?\n");
+			}
+
+			// Request the victim to sign
+			sharestruct->sign_requested = victim_iteration_no;
+
+			// Start monitoring loop
+			for (i = 0; i < MAXSAMPLES; i++) {
+
+				// Check if the victim's iteration of interest ended
+				if (active) {
+					if (!sharestruct->iteration_of_interest_running) {
 						break;
 					}
 				}
+
+				// Check if the victim's iteration of interest started
+				if (!active) {
+					i = 0;
+					if (sharestruct->iteration_of_interest_running) {
+						active = 1;
+
+					} else {
+						waiting_for_victim++;
+						if (waiting_for_victim == 1000000) {
+							fprintf(stderr, "Missed run - trying again\n");
+							rept_index--;
+							break;
+						}
+					}
+				}
+
+				asm volatile(
+					".align 32\n\t"
+					"lfence\n\t"
+					"rdtsc\n\t"					/* eax = TSC (timestamp counter)*/
+					// "shl $32, %%rdx\n\t"
+					// "or %%rdx, %%rax\n\t"
+					// "movq %%rax, %%r8\n\t"
+					"movl %%eax, %%r8d\n\t"		/* r8d = eax; this is to back up eax into another register */
+					"movq (%1), %1\n\t"			/* current = *current; LOAD */
+					"movq (%1), %1\n\t"			/* current = *current; LOAD */
+					"movq (%1), %1\n\t"			/* current = *current; LOAD */
+					"movq (%1), %1\n\t"			/* current = *current; LOAD */
+					"rdtscp\n\t"				/* eax = TSC (timestamp counter) */
+					// "shl $32, %%rdx\n\t"
+					// "or %%rdx, %%rax\n\t"
+					// "sub %%r8, %%rax\n\t"
+					"sub %%r8d, %%eax\n\t" 		/* eax = eax - r8d; get timing difference between the second timestamp and the first one */
+					"movl %%eax, %0\n\t" 		/* samples[i] = eax */
+					: "=rm"(samples[i]), "+rm"(current) /* output */
+					:
+					: "rax", "rcx", "rdx", "r8", "memory");
 			}
 
-			asm volatile(
-				".align 32\n\t"
-				"lfence\n\t"
-				"rdtsc\n\t"					/* eax = TSC (timestamp counter)*/
-				// "shl $32, %%rdx\n\t"
-				// "or %%rdx, %%rax\n\t"
-				// "movq %%rax, %%r8\n\t"
-				"movl %%eax, %%r8d\n\t"		/* r8d = eax; this is to back up eax into another register */
-				"movq (%1), %1\n\t"			/* current = *current; LOAD */
-				"movq (%1), %1\n\t"			/* current = *current; LOAD */
-				"movq (%1), %1\n\t"			/* current = *current; LOAD */
-				"movq (%1), %1\n\t"			/* current = *current; LOAD */
-				"rdtscp\n\t"				/* eax = TSC (timestamp counter) */
-				// "shl $32, %%rdx\n\t"
-				// "or %%rdx, %%rax\n\t"
-				// "sub %%r8, %%rax\n\t"
-				"sub %%r8d, %%eax\n\t" 		/* eax = eax - r8d; get timing difference between the second timestamp and the first one */
-				"movl %%eax, %0\n\t" 		/* samples[i] = eax */
-				: "=rm"(samples[i]), "+rm"(current) /* output */
-				:
-				: "rax", "rcx", "rdx", "r8", "memory");
+			// Check that the victim's iteration of interest is actually ended
+			if (sharestruct->iteration_of_interest_running || i >= MAXSAMPLES) {
+				fprintf(stderr, "Unexpected. Was not able to monitor the entire iteration.\n");
+				exit(1);
+			}
+
+			// Store the samples to disk
+			int trace_length = i;
+			for (i = 0; i < trace_length; i++) {
+				fprintf(output_data, "%" PRIu32 "\n", samples[i]);
+			}
+
+			// Wait some time before next trace
+			wait_cycles(150000000);
+
+			// Close the files for this trace
+			fclose(output_data);
 		}
-
-		// Check that the victim's iteration of interest is actually ended
-		if (sharestruct->iteration_of_interest_running || i >= MAXSAMPLES) {
-			fprintf(stderr, "Unexpected. Was not able to monitor the entire iteration.\n");
-			exit(1);
-		}
-
-		// Store the samples to disk
-		int trace_length = i;
-		for (i = 0; i < trace_length; i++) {
-			fprintf(output_data, "%" PRIu32 "\n", samples[i]);
-		}
-
-		// Wait some time before next trace
-		wait_cycles(150000000);
-
-		// Close the files for this trace
-		fclose(output_data);
 	}
 
 	// Free the buffers and file

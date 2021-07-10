@@ -1,6 +1,7 @@
 from multiprocessing import Process
 import os
-from distutils.dir_util import copy_tree, remove_tree
+from distutils.dir_util import remove_tree
+from distutils.file_util import copy_file
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
@@ -118,8 +119,8 @@ def plot_runs(left, right):
 # -------------------------------------------------------------------------------------------------------------------
 # Orchestrating Functions
 # -------------------------------------------------------------------------------------------------------------------
-def do_runs(iteration_number, directory):
-    if (iteration_number <= 0):
+def do_runs(iteration_number_1, directory_1, iteration_number_2, directory_2):
+    if iteration_number_1 <= 0 or iteration_number_2 <= 0:
         print("Iteration number should be greater than 0")
         exit(0)
 
@@ -132,7 +133,7 @@ def do_runs(iteration_number, directory):
     monitor_err = 1
     trials = 0
     while (monitor_err != 0 and trials < 3):
-        cl = [monitor_path, str(monitor_coreno), str(monitor_sliceno), str(no_victim_runs), str(iteration_number), str(cleansing_mechanism)]
+        cl = [monitor_path, str(monitor_coreno), str(monitor_sliceno), str(no_victim_runs), str(iteration_number_1), str(iteration_number_2), str(cleansing_mechanism)]
         print(cl)
         monitor_popen = subprocess.Popen(cl)
 
@@ -150,8 +151,18 @@ def do_runs(iteration_number, directory):
         exit(0)
 
     # Save output into the desired directory
-    remove_tree(directory)
-    copy_tree("out", directory)
+    remove_tree(directory_1)
+    remove_tree(directory_2)
+    os.makedirs(directory_1)
+    os.makedirs(directory_2)
+
+    files = glob.glob("out/*_1.out")
+    for x in files:
+        copy_file(x, directory_1)
+
+    files = glob.glob("out/*_2.out")
+    for x in files:
+        copy_file(x, directory_2)
 
 
 def parse_runs(directory, victim_iteration_no):
@@ -164,7 +175,7 @@ def parse_runs(directory, victim_iteration_no):
         pass
 
     # Prepare to read data from the experiments
-    out_files = sorted(glob.glob(directory + "/*_data.out"))
+    out_files = sorted(glob.glob(directory + "/*_data*.out"))
     trace_counter = 0
     all_lengths = []
     all_traces = []
@@ -177,17 +188,8 @@ def parse_runs(directory, victim_iteration_no):
         if (int(trace_number) % 500 == 0):
             print("[" + str(victim_iteration_no) + "]", 'Processing trace', trace_number)
 
-        # Get output data filename
-        data_file = directory + '/%s_data.out' % (trace_number)
-
-        # Stop if this file does not exist or is empty
-        # This is a sanity check and should not occur.
-        if not os.path.isfile(data_file) or os.stat(data_file).st_size == 0:
-            print("[" + str(victim_iteration_no) + "]", "Skipping", f)
-            continue
-
         # Parse file
-        samples = parse_file_1c(data_file)  # this array contains all the samples
+        samples = parse_file_1c(f)  # this array contains all the samples
         all_lengths.append(len(samples))
         all_traces.append(samples)
 
@@ -391,8 +393,7 @@ if __name__ == '__main__':
 
     # Run the orchestrator
     if args.collect:
-        do_runs(5, directory5)
-        do_runs(6, directory6)
+        do_runs(5, directory5, 6, directory6)
 
     if args.parse:
 
