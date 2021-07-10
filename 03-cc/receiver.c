@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 	offset = find_next_address_on_slice_and_set(buffer, slice_ID, set_ID);
 
 	// Save this address in the monitoring set
-	monitoring_set = (void **)((uint64_t) buffer + offset);
+	monitoring_set = (void **)((uint64_t)buffer + offset);
 
 	// Get the L1 and L2 cache set indexes of the monitoring set
 	index2 = get_cache_set_index((uint64_t)monitoring_set, 2);
